@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profit Hub | Deriv Smart Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg: #060c1a;
+      --bg2: #0d1828;
+      --card: #101e34;
+      --card2: #0c1726;
+      --border: rgba(0,200,255,0.1);
+      --green: #00f5a0;
+      --blue: #00d4ff;
+      --purple: #a855f7;
+      --red: #ef4444;
+      --yellow: #fbbf24;
+      --orange: #f97316;
+      --txt: #eef2ff;
+      --txt2: #7a8db0;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+    /* ─── ORBS ─── */
+    .orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.1;pointer-events:none;z-index:0;animation:orb 9s ease-in-out infinite;}
+    .o1{width:600px;height:600px;background:#00d4ff;top:-150px;left:-150px;}
+    .o2{width:450px;height:450px;background:#a855f7;bottom:-50px;right:-100px;animation-delay:4s;}
+    .o3{width:300px;height:300px;background:#00f5a0;top:40%;left:35%;animation-delay:7s;}
+    @keyframes orb{0%,100%{transform:translate(0,0);}50%{transform:translate(25px,-25px);}}
+
+    /* ─── LOGIN ─── */
+    #login-page{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+    .lc{max-width:480px;width:100%;padding:20px;position:relative;z-index:2;}
+    .brand{text-align:center;margin-bottom:32px;}
+    .brand-icon{width:76px;height:76px;background:linear-gradient(135deg,#00d4ff,#a855f7);border-radius:22px;display:inline-flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:14px;box-shadow:0 0 40px rgba(0,212,255,.4);animation:pulse 2.5s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(0,212,255,.4);}50%{box-shadow:0 0 65px rgba(168,85,247,.6);}}
+    .brand-name{font-size:34px;font-weight:900;background:linear-gradient(135deg,#00d4ff,#a855f7,#00f5a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;}
+    .brand-sub{color:var(--txt2);font-size:14px;margin-top:5px;}
+    .lbox{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:32px;box-shadow:0 28px 80px rgba(0,0,0,.5);}
+    .lbox h2{font-size:20px;font-weight:700;margin-bottom:6px;}
+    .lbox>p{color:var(--txt2);font-size:13px;margin-bottom:24px;line-height:1.6;}
+
+    /* OAuth */
+    .btn-oauth{width:100%;padding:14px;background:linear-gradient(135deg,#ff3e4d,#aa0010);border:none;border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;margin-bottom:10px;}
+    .btn-oauth:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(255,62,77,.4);}
+    .oauth-steps{background:rgba(255,62,77,.06);border:1px solid rgba(255,62,77,.18);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--txt2);line-height:1.8;margin-bottom:16px;}
+    .oauth-steps strong{color:#ff8088;}
+    .divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--txt2);font-size:12px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* Form */
+    .fg{margin-bottom:16px;}
+    .fg label{display:block;font-size:12px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+    .iw{position:relative;}
+    .iw i.pre{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt2);font-size:15px;}
+    .iw input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:13px 42px 13px 40px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .3s;}
+    .iw input:focus{border-color:var(--blue);box-shadow:0 0 18px rgba(0,212,255,.12);}
+    .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt2);cursor:pointer;font-size:15px;transition:color .2s;}
+    .eye-btn:hover{color:var(--blue);}
+    .btn-conn{width:100%;padding:14px;background:linear-gradient(135deg,#00d4ff,#a855f7);border:none;border-radius:12px;color:#000;font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .3s;}
+    .btn-conn:hover{transform:translateY(-2px);box-shadow:0 10px 35px rgba(0,212,255,.35);}
+    .lerr{margin-top:12px;padding:11px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:9px;color:#ef4444;font-size:12px;display:none;line-height:1.6;}
+    .lhint{margin-top:14px;padding:12px 14px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.12);border-radius:9px;font-size:12px;color:var(--txt2);line-height:1.7;}
+    .lhint a{color:var(--blue);text-decoration:none;font-weight:600;}
+    .lhint a:hover{text-decoration:underline;}
+
+    /* ─── TOPBAR ─── */
+    .topbar{position:fixed;top:0;left:0;right:0;height:62px;background:rgba(13,24,40,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:50;}
+    .tb-left{display:flex;align-items:center;gap:12px;}
+    .tb-logo{width:36px;height:36px;background:linear-gradient(135deg,#00d4ff,#a855f7);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+    .tb-name{font-size:18px;font-weight:900;background:linear-gradient(135deg,#00d4ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .tb-right{display:flex;align-items:center;gap:12px;}
+    .bal-chip{background:rgba(0,245,160,.08);border:1px solid rgba(0,245,160,.22);border-radius:50px;padding:7px 16px;display:flex;align-items:center;gap:7px;font-weight:700;}
+    .bal-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.4s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+    .bal-amt{font-size:15px;color:var(--green);}
+    .acct-chip{display:flex;align-items:center;gap:8px;padding:6px 13px;background:var(--card);border:1px solid var(--border);border-radius:50px;font-size:13px;font-weight:600;}
+    .acct-av{width:26px;height:26px;background:linear-gradient(135deg,#00d4ff,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#000;}
+    .btn-logout{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#ef4444;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;transition:all .2s;}
+    .btn-logout:hover{background:rgba(239,68,68,.2);}
+
+    /* ─── MAIN LAYOUT ─── */
+    #app-page{display:none;min-height:100vh;}
+    .app-wrap{padding-top:80px;padding-bottom:40px;display:grid;grid-template-columns:360px 1fr;gap:20px;padding-left:20px;padding-right:20px;max-width:1300px;margin:0 auto;position:relative;z-index:1;}
+
+    /* ─── LEFT PANEL ─── */
+    .left-panel{display:flex;flex-direction:column;gap:16px;}
+    .panel-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+    .pc-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+    .pc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+    .pc-icon.green{background:rgba(0,245,160,.12);}
+    .pc-icon.blue{background:rgba(0,212,255,.12);}
+    .pc-icon.purple{background:rgba(168,85,247,.12);}
+    .pc-icon.yellow{background:rgba(251,191,36,.12);}
+    .pc-title{font-size:14px;font-weight:700;}
+    .pc-body{padding:16px 20px;}
+
+    /* Select / Input */
+    .field{margin-bottom:14px;}
+    .field:last-child{margin-bottom:0;}
+    .field label{display:block;font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;}
+    .field select,.field input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--txt);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;transition:border-color .2s;cursor:pointer;}
+    .field select:focus,.field input[type=number]:focus{border-color:var(--blue);}
+    .field select option{background:var(--card);}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+    /* Strategy Pills */
+    .strat-pills{display:flex;gap:8px;flex-wrap:wrap;}
+    .strat-pill{padding:7px 14px;border:1px solid var(--border);border-radius:50px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;background:transparent;color:var(--txt2);}
+    .strat-pill.active{background:linear-gradient(135deg,#00d4ff,#a855f7);color:#000;border-color:transparent;}
+    .strat-pill:hover:not(.active){border-color:var(--blue);color:var(--txt);}
+
+    /* Bot Tier Cards */
+    .tier-cards{display:flex;flex-direction:column;gap:10px;}
+    .tier-card{padding:14px 16px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:12px;}
+    .tier-card.low{background:rgba(0,245,160,.06);border-color:rgba(0,245,160,.15);}
+    .tier-card.medium{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.15);}
+    .tier-card.advanced{background:rgba(168,85,247,.06);border-color:rgba(168,85,247,.15);}
+    .tier-card.selected.low{border-color:var(--green);box-shadow:0 0 20px rgba(0,245,160,.2);}
+    .tier-card.selected.medium{border-color:var(--yellow);box-shadow:0 0 20px rgba(251,191,36,.2);}
+    .tier-card.selected.advanced{border-color:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.2);}
+    .tier-icon{font-size:26px;}
+    .tier-info{flex:1;}
+    .tier-name{font-size:13px;font-weight:700;}
+    .tier-desc{font-size:11px;color:var(--txt2);margin-top:2px;}
+    .tier-range{font-size:12px;font-weight:700;margin-left:auto;}
+    .tier-card.low .tier-range{color:var(--green);}
+    .tier-card.medium .tier-range{color:var(--yellow);}
+    .tier-card.advanced .tier-range{color:var(--purple);}
+
+    /* Run Button */
+    .btn-run{width:100%;padding:16px;border:none;border-radius:13px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;}
+    .btn-run.start{background:linear-gradient(135deg,var(--green),var(--blue));color:#000;}
+    .btn-run.stop{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+    .btn-run:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.3);}
+    .btn-run:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .run-dot{width:9px;height:9px;border-radius:50%;background:currentColor;}
+    .run-dot.running{animation:blink .8s ease-in-out infinite;}
+
+    /* ─── RIGHT PANEL ─── */
+    .right-panel{display:flex;flex-direction:column;gap:16px;}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .3s;}
+    .sc:hover{transform:translateY(-2px);border-color:rgba(0,212,255,.25);}
+    .sc-label{font-size:11px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;}
+    .sc-val{font-size:24px;font-weight:800;line-height:1.2;}
+    .sc-sub{font-size:12px;margin-top:3px;color:var(--txt2);}
+
+    /* Trade log */
+    .log-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;flex:1;}
+    .log-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+    .log-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px;}
+    .live-badge{background:rgba(0,245,160,.1);border:1px solid rgba(0,245,160,.22);color:var(--green);font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;display:flex;align-items:center;gap:5px;text-transform:uppercase;}
+    .btn-clr{background:none;border:1px solid var(--border);color:var(--txt2);padding:5px 12px;border-radius:7px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;transition:all .2s;}
+    .btn-clr:hover{border-color:rgba(0,212,255,.3);color:var(--txt);}
+    .log-body{height:320px;overflow-y:auto;padding:8px 0;}
+    .log-body::-webkit-scrollbar{width:3px;}
+    .log-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+    .log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--txt2);gap:10px;}
+    .log-empty i{font-size:32px;opacity:.25;}
+    .log-row{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,.025);animation:slide-in .3s ease;transition:background .2s;}
+    .log-row:hover{background:rgba(255,255,255,.02);}
+    @keyframes slide-in{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+    .lr-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+    .lr-icon.win{background:rgba(0,245,160,.1);}
+    .lr-icon.loss{background:rgba(239,68,68,.1);}
+    .lr-icon.pending{background:rgba(0,212,255,.1);}
+    .lr-info{flex:1;}
+    .lr-bot{font-size:13px;font-weight:700;}
+    .lr-detail{font-size:11px;color:var(--txt2);margin-top:1px;}
+    .lr-right{text-align:right;}
+    .lr-pnl{font-size:14px;font-weight:800;}
+    .lr-time{font-size:11px;color:var(--txt2);margin-top:1px;}
+
+    /* Summary Bar */
+    .summary-bar{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+    .sb-item{text-align:center;}
+    .sb-label{font-size:10px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.6px;}
+    .sb-val{font-size:16px;font-weight:800;margin-top:3px;}
+
+    /* Notification */
+    .notif{position:fixed;top:72px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 18px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;z-index:999;transform:translateX(160%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+    .notif.show{transform:translateX(0);}
+    .notif.success{border-color:rgba(0,245,160,.3);}
+    .notif.error{border-color:rgba(239,68,68,.3);}
+    .notif.info{border-color:rgba(0,212,255,.3);}
+
+    /* Loading */
+    .loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;gap:18px;}
+    .spin{width:46px;height:46px;border:3px solid rgba(0,212,255,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .spin-txt{color:var(--txt2);font-size:14px;}
+
+    /* Progress */
+    .prog-wrap{height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:10px;overflow:hidden;}
+    .prog-bar{height:100%;border-radius:2px;transition:width .5s ease;}
+
+    /* Colors */
+    .c-green{color:var(--green);}
+    .c-blue{color:var(--blue);}
+    .c-purple{color:var(--purple);}
+    .c-yellow{color:var(--yellow);}
+    .c-red{color:var(--red);}
+
+    @media(max-width:1100px){.app-wrap{grid-template-columns:1fr;}}
+    @media(max-width:700px){.stats-grid{grid-template-columns:1fr 1fr;}.summary-bar{grid-template-columns:repeat(3,1fr);}.tb-right .acct-chip span{display:none;}}
+  </style>
+</head>
+<body>
+
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+<div class="orb o3"></div>
+
+<!-- Notification -->
+<div class="notif" id="notif">
+  <span id="notif-ico">✅</span>
+  <span id="notif-txt">Connected!</span>
+</div>
+
+<!-- Loader -->
+<div class="loader" id="loader" style="display:none;">
+  <div class="spin"></div>
+  <div class="spin-txt" id="loader-txt">Connecting...</div>
+</div>
+
+<!-- ═══════════ LOGIN PAGE ═══════════ -->
+<div id="login-page">
+  <div class="lc">
+    <div class="brand">
+      <div class="brand-icon">📈</div>
+      <div class="brand-name">Profit Hub</div>
+      <div class="brand-sub">Deriv Official API | Smart Bot Trading</div>
+    </div>
+    <div class="lbox">
+      <h2>Connect Account</h2>
+      <p>ඔබේ Deriv account ඒකෙ connect කරන්න.</p>
+
+      <!-- OAuth Login -->
+      <button class="btn-oauth" onclick="openOAuth()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        🔑 Deriv Login &nbsp;(Click කරන්න)
+      </button>
+
+      <div class="oauth-steps">
+        <strong>📌 Steps:</strong><br/>
+        1. Above button click කරන්න → Deriv login page ඒකෙ open වෙනවා<br/>
+        2. Login කරලා submit කරන්න<br/>
+        3. Redirect වෙන URL ඒකෙ <strong>?token1=a1-xxxxx</strong> copy කරන්න<br/>
+        4. පහළ box ඒකෙ paste කරන්න ✅
+      </div>
+
+      <div class="divider">හෝ Token paste කරන්න</div>
+
+      <div class="fg">
+        <label><i class="fa fa-key" style="margin-right:5px;"></i>API Token</label>
+        <div class="iw">
+          <i class="fa fa-lock pre"></i>
+          <input type="password" id="tok-inp" placeholder="a1-xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
+          <button class="eye-btn" onclick="toggleEye()"><i class="fa fa-eye" id="eye-ico"></i></button>
+        </div>
+      </div>
+
+      <button class="btn-conn" id="btn-conn" onclick="doConnect()">
+        <i class="fa fa-plug" style="margin-right:7px;"></i>Connect to Deriv
+      </button>
+      <div class="lerr" id="lerr"></div>
+
+      <div class="lhint" style="margin-top:14px;">
+        💡 Desktop browser ඒකෙ <a href="https://app.deriv.com/account/api-token" target="_blank">app.deriv.com/account/api-token</a> ට ගිහිල්ලා <strong>Read + Trade + Admin</strong> token ඒකක් හදාගන්නත් පුළුවන්.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APP PAGE ═══════════ -->
+<div id="app-page">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-logo">📈</div>
+      <div class="tb-name">Profit Hub</div>
+    </div>
+    <div class="tb-right">
+      <div class="bal-chip">
+        <div class="bal-dot"></div>
+        <span class="bal-amt" id="live-bal">$0.00</span>
+        <span style="color:var(--txt2);font-size:11px;" id="live-cur">USD</span>
+      </div>
+      <div class="acct-chip">
+        <div class="acct-av" id="acct-av">U</div>
+        <span id="acct-name">Account</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+
+  <div class="app-wrap">
+
+    <!-- ═══ LEFT PANEL ═══ -->
+    <div class="left-panel">
+
+      <!-- Trade Parameters -->
+      <div class="panel-card">
+        <div class="pc-header">
+          <div class="pc-icon blue"><i class="fa fa-sliders-h" style="color:var(--blue);"></i></div>
+          <div class="pc-title">⚙️ Trade Parameters</div>
+        </div>
+        <div class="pc-body">
+          <div class="field">
+            <label>Market / Index</label>
+            <select id="f-market">
+              <option value="R_10">Volatility 10 Index</option>
+              <option value="R_25">Volatility 25 Index</option>
+              <option value="R_50">Volatility 50 Index</option>
+              <option value="R_75" selected>Volatility 75 Index</option>
+              <option value="R_100">Volatility 100 Index</option>
+              <option value="1HZ10V">Volatility 10 (1s) Index</option>
+              <option value="1HZ25V">Volatility 25 (1s) Index</option>
+              <option value="1HZ50V">Volatility 50 (1s) Index</option>
+              <option value="1HZ75V">Volatility 75 (1s) Index</option>
+              <option value="1HZ100V">Volatility 100 (1s) Index</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contract Type</label>
+            <select id="f-contract">
+              <option value="CALL_PUT">Rise / Fall</option>
+              <option value="DIGITOVER">Digit Over</option>
+              <option value="DIGITUNDER">Digit Under</option>
+              <option value="DIGITMATCH">Digit Match</option>
+              <option value="DIGITDIFF">Digit Differs</option>
+              <option value="DIGITODD">Digit Odd</option>
+              <option value="DIGITEVEN">Digit Even</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Duration</label>
+              <input type="number" id="f-dur" value="5" min="1" max="10"/>
+            </div>
+            <div class="field">
+              <label>Duration Unit</label>
+              <select id="f-durunit">
+                <option value="t" selected>Ticks</option>
+                <option value="s">Seconds</option>
+                <option value="m">Minutes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bot Tier Selector -->
+      <div class="panel-card">
+        <div class="pc-header">
+          <div class="pc-icon purple"><i class="fa fa-robot" style="color:var(--purple);"></i></div>
+          <div class="pc-title">🤖 Select Bot Tier</div>
+        </div>
+        <div class="pc-body">
+          <div class="tier-cards">
+            <div class="tier-card low selected" id="tier-low" onclick="selectTier('low')">
+              <div class="tier-icon">🟢</div>
+              <div class="tier-info">
+                <div class="tier-name">Low Capital</div>
+                <div class="tier-desc">Safe · Conservative Martingale</div>
+              </div>
+              <div class="tier-range">$10 – $50</div>
+            </div>
+            <div class="tier-card medium" id="tier-medium" onclick="selectTier('medium')">
+              <div class="tier-icon">🟡</div>
+              <div class="tier-info">
+                <div class="tier-name">Medium Capital</div>
+                <div class="tier-desc">Balanced · Moderate Risk</div>
+              </div>
+              <div class="tier-range">$50 – $200</div>
+            </div>
+            <div class="tier-card advanced" id="tier-advanced" onclick="selectTier('advanced')">
+              <div class="tier-icon">🔴</div>
+              <div class="tier-info">
+                <div class="tier-name">Advanced Capital</div>
+                <div class="tier-desc">Aggressive · Compound + Martingale</div>
+              </div>
+              <div class="tier-range">$200+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Money Management -->
+      <div class="panel-card">
+        <div class="pc-header">
+          <div class="pc-icon green"><i class="fa fa-dollar-sign" style="color:var(--green);"></i></div>
+          <div class="pc-title">💰 Money Management</div>
+        </div>
+        <div class="pc-body">
+          <div class="field-row">
+            <div class="field">
+              <label>Initial Stake ($)</label>
+              <input type="number" id="f-stake" value="0.50" min="0.35" step="0.05"/>
+            </div>
+            <div class="field">
+              <label>Martingale ×</label>
+              <input type="number" id="f-multi" value="2.1" min="1.5" max="5" step="0.1"/>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>🛑 Stop Loss ($)</label>
+              <input type="number" id="f-sl" value="5" min="1" step="0.5"/>
+            </div>
+            <div class="field">
+              <label>🎯 Take Profit ($)</label>
+              <input type="number" id="f-tp" value="10" min="1" step="0.5"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Strategy</label>
+            <div class="strat-pills">
+              <button class="strat-pill active" id="sp-martingale" onclick="setStrat('martingale')">Martingale</button>
+              <button class="strat-pill" id="sp-reverse" onclick="setStrat('reverse')">Reverse Martin.</button>
+              <button class="strat-pill" id="sp-dalembert" onclick="setStrat('dalembert')">D'Alembert</button>
+              <button class="strat-pill" id="sp-flat" onclick="setStrat('flat')">Flat Bet</button>
+            </div>
+          </div>
+          <div class="prog-wrap" id="prog-bar-wrap">
+            <div class="prog-bar" id="prog-bar" style="width:0%;background:linear-gradient(90deg,var(--green),var(--blue));"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);margin-top:5px;">
+            <span>Progress to Target</span><span id="prog-pct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Run Button -->
+      <button class="btn-run start" id="run-btn" onclick="toggleRun()">
+        <span class="run-dot" id="run-dot"></span>
+        <span id="run-txt">▶ Start Bot</span>
+      </button>
+
+    </div><!-- /left -->
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <div class="right-panel">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="sc">
+          <div class="sc-label">💰 Balance</div>
+          <div class="sc-val c-green" id="s-bal">$0.00</div>
+          <div class="sc-sub" style="display:flex;align-items:center;gap:5px;"><span class="bal-dot"></span>Live</div>
+        </div>
+        <div class="sc">
+          <div class="sc-label">📈 Session P&amp;L</div>
+          <div class="sc-val" id="s-pnl" style="color:var(--green);">+$0.00</div>
+          <div class="sc-sub c-green" id="s-pnl-pct">+0.00%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-label">🔄 Total Trades</div>
+          <div class="sc-val c-blue" id="s-trades">0</div>
+          <div class="sc-sub c-blue" id="s-wr">Win Rate: 0%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-label">🤖 Bot Status</div>
+          <div class="sc-val c-purple" id="s-status">Idle</div>
+          <div class="sc-sub" id="s-tier">No tier selected</div>
+        </div>
+      </div>
+
+      <!-- Summary Bar -->
+      <div class="summary-bar">
+        <div class="sb-item">
+          <div class="sb-label">Wins</div>
+          <div class="sb-val c-green" id="sb-wins">0</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">Losses</div>
+          <div class="sb-val c-red" id="sb-losses">0</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">Current Stake</div>
+          <div class="sb-val c-blue" id="sb-stake">$0.00</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">Martin. Step</div>
+          <div class="sb-val c-yellow" id="sb-mstep">0 / 0</div>
+        </div>
+        <div class="sb-item">
+          <div class="sb-label">Total Profit</div>
+          <div class="sb-val" id="sb-profit" style="color:var(--green);">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Trade Log -->
+      <div class="log-card">
+        <div class="log-head">
+          <div class="log-title">
+            📋 Live Trade Log
+            <span class="live-badge"><span class="bal-dot"></span>LIVE</span>
+          </div>
+          <button class="btn-clr" onclick="clearLog()">Clear</button>
+        </div>
+        <div class="log-body" id="trade-log">
+          <div class="log-empty" id="log-empty">
+            <i class="fa fa-chart-bar"></i>
+            <span>Start a bot to see live trades here!</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right -->
+  </div><!-- /app-wrap -->
+</div><!-- /app-page -->
+
+<script>
+// ╔══════════════════════════════════════════════╗
+// ║         PROFIT HUB — BOT ENGINE             ║
+// ╚══════════════════════════════════════════════╝
+
+const WS_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=36544';
+const OAUTH_URL = 'https://oauth.deriv.com/oauth2/authorize?app_id=36544&l=EN&brand=deriv';
+
+let ws = null, apiToken = '', accountInfo = {}, currentBalance = 0, startBalance = 0;
+let reqId = 1, pending = {};
+
+// Bot state
+let botRunning = false, botTimer = null;
+let trades = 0, wins = 0, losses = 0, sessionPnl = 0;
+let currentStake = 0, baseStake = 0, martStep = 0;
+let selectedTier = 'low', currentStrategy = 'martingale';
+let maxMartingale = { low: 3, medium: 4, advanced: 5 };
+
+// ── WebSocket ──
+function createWS() {
+  return new Promise((resolve, reject) => {
+    if (ws) { try { ws.close(); } catch(e){} }
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => resolve(ws);
+    ws.onerror = () => reject(new Error('WebSocket failed'));
+    ws.onmessage = onMessage;
+    ws.onclose = onClose;
+    setTimeout(() => reject(new Error('Connection timeout')), 12000);
+  });
+}
+
+function onClose() {
+  if (!apiToken) return;
+  showNotif('⚠️ Connection lost. Reconnecting...', 'error');
+  if (botRunning) { botRunning = false; updateRunBtn(); updateStatus(); }
+  setTimeout(() => { createWS().then(() => authorize()).catch(() => {}); }, 3000);
+}
+
+function sendWS(payload) {
+  return new Promise((resolve, reject) => {
+    if (!ws || ws.readyState !== 1) { reject(new Error('Not connected')); return; }
+    const id = reqId++;
+    payload.req_id = id;
+    pending[id] = { resolve, reject };
+    ws.send(JSON.stringify(payload));
+    setTimeout(() => { if (pending[id]) { delete pending[id]; reject(new Error('Timeout')); } }, 20000);
+  });
+}
+
+function onMessage(e) {
+  const d = JSON.parse(e.data);
+  if (d.req_id && pending[d.req_id]) {
+    const { resolve, reject } = pending[d.req_id];
+    delete pending[d.req_id];
+    d.error ? reject(new Error(d.error.message)) : resolve(d);
+    return;
+  }
+  if (d.msg_type === 'balance') {
+    currentBalance = parseFloat(d.balance.balance);
+    updateBalanceUI();
+  }
+}
+
+async function authorize() {
+  const res = await sendWS({ authorize: apiToken });
+  accountInfo = res.authorize;
+  currentBalance = parseFloat(accountInfo.balance);
+  startBalance = currentBalance;
+  document.getElementById('acct-name').textContent = accountInfo.loginid || 'Account';
+  document.getElementById('acct-av').textContent = (accountInfo.loginid || 'U')[0];
+  document.getElementById('live-cur').textContent = accountInfo.currency || 'USD';
+  updateBalanceUI();
+  sendWS({ balance: 1, subscribe: 1 }).catch(() => {});
+  return res;
+}
+
+// ── UI Updates ──
+function updateBalanceUI() {
+  const fmt = n => (parseFloat(n) || 0).toFixed(2);
+  document.getElementById('live-bal').textContent = '$' + fmt(currentBalance);
+  document.getElementById('s-bal').textContent = '$' + fmt(currentBalance);
+
+  const pnl = sessionPnl;
+  const pEl = document.getElementById('s-pnl');
+  pEl.textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+  pEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  const pct = startBalance > 0 ? ((pnl / startBalance) * 100).toFixed(2) : '0.00';
+  const pcEl = document.getElementById('s-pnl-pct');
+  pcEl.textContent = (pnl >= 0 ? '+' : '') + pct + '%';
+  pcEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('s-trades').textContent = trades;
+  const wr = trades > 0 ? Math.round((wins / trades) * 100) : 0;
+  document.getElementById('s-wr').textContent = 'Win Rate: ' + wr + '%';
+
+  document.getElementById('sb-wins').textContent = wins;
+  document.getElementById('sb-losses').textContent = losses;
+  document.getElementById('sb-stake').textContent = '$' + (currentStake || baseStake).toFixed(2);
+  document.getElementById('sb-mstep').textContent = martStep + ' / ' + maxMartingale[selectedTier];
+
+  const spEl = document.getElementById('sb-profit');
+  spEl.textContent = (sessionPnl >= 0 ? '+$' : '-$') + Math.abs(sessionPnl).toFixed(2);
+  spEl.style.color = sessionPnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Progress bar
+  const tp = parseFloat(document.getElementById('f-tp').value) || 1;
+  const pPct = Math.min(Math.max((sessionPnl / tp) * 100, 0), 100).toFixed(0);
+  document.getElementById('prog-bar').style.width = pPct + '%';
+  document.getElementById('prog-pct').textContent = pPct + '%';
+}
+
+function updateStatus() {
+  const el = document.getElementById('s-status');
+  if (botRunning) {
+    el.textContent = 'Running';
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = 'Idle';
+    el.style.color = 'var(--purple)';
+  }
+  const tierLabels = { low: '🟢 Low Capital', medium: '🟡 Medium Capital', advanced: '🔴 Advanced Capital' };
+  document.getElementById('s-tier').textContent = tierLabels[selectedTier] || '';
+}
+
+function updateRunBtn() {
+  const btn = document.getElementById('run-btn');
+  const dot = document.getElementById('run-dot');
+  const txt = document.getElementById('run-txt');
+  if (botRunning) {
+    btn.className = 'btn-run stop';
+    dot.classList.add('running');
+    txt.textContent = '⏹ Stop Bot';
+  } else {
+    btn.className = 'btn-run start';
+    dot.classList.remove('running');
+    txt.textContent = '▶ Start Bot';
+  }
+}
+
+// ── Tier / Strategy ──
+function selectTier(tier) {
+  selectedTier = tier;
+  document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('tier-' + tier).classList.add('selected');
+
+  // Auto-fill defaults by tier
+  const defaults = {
+    low:      { stake: 0.35, sl: 5,  tp: 10,  multi: 2.1 },
+    medium:   { stake: 1.00, sl: 15, tp: 30,  multi: 2.1 },
+    advanced: { stake: 5.00, sl: 50, tp: 100, multi: 2.2 }
+  };
+  const d = defaults[tier];
+  document.getElementById('f-stake').value = d.stake;
+  document.getElementById('f-sl').value    = d.sl;
+  document.getElementById('f-tp').value    = d.tp;
+  document.getElementById('f-multi').value = d.multi;
+  updateBalanceUI();
+}
+
+function setStrat(s) {
+  currentStrategy = s;
+  document.querySelectorAll('.strat-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('sp-' + s).classList.add('active');
+}
+
+// ── Bot Engine ──
+function toggleRun() {
+  if (botRunning) stopBot();
+  else startBot();
+}
+
+function startBot() {
+  baseStake   = parseFloat(document.getElementById('f-stake').value)   || 0.35;
+  currentStake = baseStake;
+  const sl     = parseFloat(document.getElementById('f-sl').value)     || 5;
+  const tp     = parseFloat(document.getElementById('f-tp').value)     || 10;
+
+  if (baseStake < 0.35) { showNotif('⚠️ Minimum stake $0.35', 'error'); return; }
+  if (!ws || ws.readyState !== 1) { showNotif('❌ Not connected!', 'error'); return; }
+
+  botRunning = true; martStep = 0;
+  updateRunBtn(); updateStatus();
+  showNotif('🚀 Bot started! (' + selectedTier + ')', 'success');
+  addLog('info', 'Bot started · ' + selectedTier + ' tier', '');
+  runCycle();
+}
+
+function stopBot(reason) {
+  botRunning = false;
+  if (botTimer) { clearTimeout(botTimer); botTimer = null; }
+  updateRunBtn(); updateStatus();
+  if (reason) { addLog('info', '⏹ ' + reason, ''); showNotif('⏹ ' + reason, 'info'); }
+  else { showNotif('⏹ Bot stopped.', 'info'); }
+}
+
+async function runCycle() {
+  if (!botRunning) return;
+
+  const sl     = parseFloat(document.getElementById('f-sl').value)     || 5;
+  const tp     = parseFloat(document.getElementById('f-tp').value)     || 10;
+  const multi  = parseFloat(document.getElementById('f-multi').value)  || 2.1;
+  const market = document.getElementById('f-market').value;
+  const dur    = parseInt(document.getElementById('f-dur').value)      || 5;
+  const durU   = document.getElementById('f-durunit').value;
+  const ctype  = document.getElementById('f-contract').value;
+
+  // Determine buy type
+  let buyType = 'CALL'; // default Rise
+  let barrier = undefined;
+
+  if (ctype === 'CALL_PUT') {
+    // Alternate Rise/Fall based on tick count for advanced
+    buyType = (trades % 2 === 0) ? 'CALL' : 'PUT';
+    if (selectedTier === 'advanced') buyType = 'CALL'; // pure CALL for advanced
+  } else if (ctype === 'DIGITOVER') { buyType = 'DIGITOVER'; barrier = '4'; }
+  else if (ctype === 'DIGITUNDER') { buyType = 'DIGITUNDER'; barrier = '5'; }
+  else if (ctype === 'DIGITMATCH') { buyType = 'DIGITMATCH'; barrier = '5'; }
+  else if (ctype === 'DIGITDIFF')  { buyType = 'DIGITDIFF'; barrier = '5'; }
+  else if (ctype === 'DIGITODD')   { buyType = 'DIGITODD'; }
+  else if (ctype === 'DIGITEVEN')  { buyType = 'DIGITEVEN'; }
+
+  try {
+    // Step 1: Get proposal
+    const propPayload = {
+      proposal: 1,
+      amount: currentStake.toFixed(2),
+      basis: 'stake',
+      contract_type: buyType,
+      currency: accountInfo.currency || 'USD',
+      duration: dur,
+      duration_unit: durU,
+      symbol: market
+    };
+    if (barrier !== undefined) propPayload.barrier = barrier;
+
+    addLog('pending', 'Placing trade · $' + currentStake.toFixed(2) + ' · ' + buyType + ' · ' + market, '');
+
+    const prop = await sendWS(propPayload);
+    if (!botRunning) return;
+    if (prop.error) throw new Error(prop.error.message);
+
+    // Step 2: Buy
+    const buyRes = await sendWS({ buy: prop.proposal.id, price: currentStake.toFixed(2) });
+    if (!botRunning) return;
+    if (buyRes.error) throw new Error(buyRes.error.message);
+
+    const contractId = buyRes.buy.contract_id;
+
+    // Step 3: Poll result
+    await pollContract(contractId, sl, tp, multi);
+
+  } catch (err) {
+    if (!botRunning) return;
+    addLog('loss', 'Error: ' + err.message, '');
+    showNotif('⚠️ ' + err.message.substring(0, 60), 'error');
+    botTimer = setTimeout(runCycle, 5000);
+  }
+}
+
+async function pollContract(cid, sl, tp, multi) {
+  if (!botRunning) return;
+  let attempts = 0;
+  const maxAttempts = 40;
+
+  const check = async () => {
+    if (!botRunning) return;
+    if (attempts++ > maxAttempts) {
+      handleResult(false, currentStake, 0, sl, tp, multi);
+      return;
+    }
+    try {
+      const r = await sendWS({ proposal_open_contract: 1, contract_id: cid, subscribe: 0 });
+      const poc = r.proposal_open_contract;
+
+      if (poc.is_sold || poc.status === 'won' || poc.status === 'lost') {
+        const won = poc.status === 'won';
+        const profit = parseFloat(poc.profit || 0);
+        handleResult(won, currentStake, profit, sl, tp, multi);
+      } else {
+        botTimer = setTimeout(check, 2000);
+      }
+    } catch(e) {
+      botTimer = setTimeout(check, 3000);
+    }
+  };
+  check();
+}
+
+function handleResult(won, stake, profit, sl, tp, multi) {
+  if (!botRunning) return;
+  trades++;
+
+  if (won) {
+    wins++;
+    sessionPnl += profit;
+    martStep = 0;
+    currentStake = baseStake;
+    addLog('win', 'WIN ✅ · +$' + profit.toFixed(2) + ' · stake $' + stake.toFixed(2), '');
+    showNotif('✅ WIN +$' + profit.toFixed(2), 'success');
+
+    // Strategy: compound on advanced
+    if (selectedTier === 'advanced' && currentStrategy === 'martingale') {
+      // Compound: add 10% of profit to base stake
+      const newBase = Math.min(baseStake * 1.05, baseStake * 3);
+      baseStake = parseFloat(newBase.toFixed(2));
+      currentStake = baseStake;
+    }
+
+    if (sessionPnl >= tp) { stopBot('🎯 Take Profit reached!'); updateBalanceUI(); return; }
+
+  } else {
+    losses++;
+    sessionPnl -= stake;
+    addLog('loss', 'LOSS ❌ · -$' + stake.toFixed(2), '');
+
+    if (Math.abs(Math.min(sessionPnl, 0)) >= sl) {
+      updateBalanceUI(); stopBot('🛑 Stop Loss triggered!'); return;
+    }
+
+    // Apply strategy
+    const maxM = maxMartingale[selectedTier];
+    if (currentStrategy === 'martingale') {
+      if (martStep < maxM) { martStep++; currentStake = parseFloat((stake * multi).toFixed(2)); }
+      else { martStep = 0; currentStake = baseStake; }
+    } else if (currentStrategy === 'reverse') {
+      // Reverse: increase on WIN (handled above), reset on loss
+      martStep = 0; currentStake = baseStake;
+    } else if (currentStrategy === 'dalembert') {
+      currentStake = parseFloat((stake + baseStake).toFixed(2));
+      martStep++;
+    } else {
+      currentStake = baseStake; // flat
+    }
+  }
+
+  updateBalanceUI();
+  botTimer = setTimeout(runCycle, 1500);
+}
+
+// ── Log ──
+function addLog(type, detail, contractId) {
+  const log = document.getElementById('trade-log');
+  const empty = document.getElementById('log-empty');
+  if (empty) empty.style.display = 'none';
+
+  const icons = { win: '✅', loss: '❌', pending: '⏳', info: 'ℹ️' };
+  const colors = { win: 'var(--green)', loss: 'var(--red)', pending: 'var(--blue)', info: 'var(--txt2)' };
+
+  const row = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML = `
+    <div class="lr-icon ${type}">${icons[type] || '📋'}</div>
+    <div class="lr-info">
+      <div class="lr-bot">${detail}</div>
+      <div class="lr-detail">${contractId ? '#' + contractId : new Date().toLocaleTimeString()}</div>
+    </div>
+    <div class="lr-right">
+      <div class="lr-time">${new Date().toLocaleTimeString()}</div>
+    </div>
+  `;
+  log.insertBefore(row, log.firstChild);
+  while (log.children.length > 100) log.removeChild(log.lastChild);
+}
+
+function clearLog() {
+  document.getElementById('trade-log').innerHTML =
+    '<div class="log-empty" id="log-empty"><i class="fa fa-chart-bar"></i><span>Start a bot to see live trades here!</span></div>';
+}
+
+// ── Notification ──
+let notifT = null;
+function showNotif(txt, type = 'info') {
+  const el = document.getElementById('notif');
+  document.getElementById('notif-txt').textContent = txt;
+  el.className = 'notif ' + type + ' show';
+  if (notifT) clearTimeout(notifT);
+  notifT = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Auth ──
+function openOAuth() {
+  window.open(OAUTH_URL, '_blank', 'width=600,height=700');
+  showNotif('🔑 Login page ඒකෙ open වෙනවා...', 'info');
+}
+
+function toggleEye() {
+  const i = document.getElementById('tok-inp');
+  const ic = document.getElementById('eye-ico');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  ic.className = i.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+}
+
+async function doConnect() {
+  const token = document.getElementById('tok-inp').value.trim();
+  if (!token || token.length < 10) { showLErr('⚠️ Token ඇතුළු කරන්න.'); return; }
+
+  apiToken = token;
+  const btn = document.getElementById('btn-conn');
+  btn.disabled = true; btn.textContent = 'Connecting...';
+  document.getElementById('lerr').style.display = 'none';
+  showLoader('Connecting to Deriv...');
+
+  try {
+    await createWS();
+    showLoader('Authorizing...');
+    await authorize();
+    localStorage.setItem('ph_token', token);
+    hideLoader();
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app-page').style.display = 'block';
+    showNotif('✅ Connected! Welcome ' + (accountInfo.loginid || ''), 'success');
+    updateStatus(); updateBalanceUI();
+  } catch (err) {
+    hideLoader();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-plug" style="margin-right:7px;"></i>Connect to Deriv';
+    let msg = err.message || 'Unknown error';
+    if (msg.toLowerCase().includes('token') || msg.toLowerCase().includes('auth') || msg.toLowerCase().includes('invalid')) {
+      msg = '❌ Token invalid! නිවැරදි Deriv trading token ඒකෙ ඕනෙ.\n\n✅ app.deriv.com/account/api-token ට ගිහිල්ලා Read+Trade+Admin token ඒකක් හදාගන්න.';
+    }
+    showLErr(msg);
+  }
+}
+
+function showLErr(msg) {
+  const el = document.getElementById('lerr');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function showLoader(txt) {
+  document.getElementById('loader').style.display = 'flex';
+  document.getElementById('loader-txt').textContent = txt;
+}
+function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+
+function doLogout() {
+  if (botRunning) stopBot();
+  if (ws) { try { ws.close(); } catch(e){} ws = null; }
+  apiToken = ''; trades = 0; wins = 0; losses = 0; sessionPnl = 0;
+  localStorage.removeItem('ph_token');
+  document.getElementById('app-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  clearLog(); updateBalanceUI();
+}
+
+// ── Init ──
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('ph_token');
+  if (saved) document.getElementById('tok-inp').value = saved;
+  document.getElementById('tok-inp').addEventListener('keydown', e => { if (e.key === 'Enter') doConnect(); });
+
+  // Check URL for OAuth token (e.g. ?token1=a1-xxx)
+  const params = new URLSearchParams(window.location.search);
+  const t1 = params.get('token1');
+  if (t1) {
+    document.getElementById('tok-inp').value = t1;
+    showNotif('🔑 Token detected from URL!', 'info');
+  }
+
+  // Pre-select low tier
+  selectTier('low');
+});
+</script>
+</body>
+</html>

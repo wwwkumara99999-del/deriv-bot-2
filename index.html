@@ -524,8 +524,8 @@
 // ║         PROFIT HUB — BOT ENGINE             ║
 // ╚══════════════════════════════════════════════╝
 
-const WS_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=33xBpiwT1F0zfDT43tA2U';
-const OAUTH_URL = 'https://oauth.deriv.com/oauth2/authorize?app_id=33xBpiwT1F0zfDT43tA2U&l=EN&brand=deriv';
+const APP_ID = '33xBpiwT1F0zfDT43tA2U';
+const WS_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=' + APP_ID;
 
 let ws = null, apiToken = '', accountInfo = {}, currentBalance = 0, startBalance = 0;
 let reqId = 1, pending = {};
@@ -900,8 +900,12 @@ function showNotif(txt, type = 'info') {
 
 // ── Auth ──
 function openOAuth() {
-  window.open(OAUTH_URL, '_blank', 'width=600,height=700');
-  showNotif('🔑 Login page ඒකෙ open වෙනවා...', 'info');
+  const redirectUri = window.location.href.split('?')[0];
+  const oauthUrl = 'https://oauth.deriv.com/oauth2/authorize?app_id=' + APP_ID + '&l=EN&brand=deriv&redirect_uri=' + encodeURIComponent(redirectUri);
+  showNotif('🔑 Redirecting to Deriv Login...', 'info');
+  setTimeout(() => {
+    window.location.href = oauthUrl;
+  }, 800);
 }
 
 function toggleEye() {
@@ -975,7 +979,9 @@ window.addEventListener('load', () => {
   const t1 = params.get('token1');
   if (t1) {
     document.getElementById('tok-inp').value = t1;
-    showNotif('🔑 Token detected from URL!', 'info');
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showNotif('🔑 Auto-connecting with token...', 'success');
+    setTimeout(doConnect, 500);
   }
 
   // Pre-select low tier
